@@ -17,6 +17,7 @@ import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 import java.awt.Color;
+import java.lang.Thread.State;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,10 +79,16 @@ public class RiskyBusinessRestService {
 	@Path("startturn")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response startTurn(@Context final UriInfo ui) {
-		GameState gameState = GameStateCaretaker.get_instance().gameState;
-		gameState.setPlayerTurn();
-		System.out.println("player turn: " + gameState.getCurrentTurnPlayer());
-		return Response.status(Status.OK).entity("Check log").build();
+		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
+				GameStateCaretaker.get_instance().gameState);
+		String error = ruler.startTurnSignal();
+		if (error == null) {
+			return Response.status(Status.OK)
+					.entity(ResponseFormat.createResponse(ruler.currentState.getJSON(), "Your Turn!")).build();
+		} else {
+			return Response.status(Status.OK).entity(ResponseFormat.createResponse(333, error)).build();
+
+		}
 	}
 
 	@GET
@@ -91,7 +98,7 @@ public class RiskyBusinessRestService {
 		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
 				GameStateCaretaker.get_instance().gameState);
 
-		String error = ruler.setTurnTypeToAttack(true);
+		String error = ruler.setTurnTypeToAttack();
 		if (error == null) {
 			return Response.status(Status.OK)
 					.entity(ResponseFormat.createResponse(ruler.currentState.getJSON(), "success")).build();
@@ -106,7 +113,7 @@ public class RiskyBusinessRestService {
 	public Response SetPass(@Context final UriInfo ui) {
 		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
 				GameStateCaretaker.get_instance().gameState);
-		String error = ruler.setTurnTypeToAttack(false);
+		String error = ruler.passTurn();
 		if (error == null) {
 			return Response.status(Status.OK)
 					.entity(ResponseFormat.createResponse(ruler.currentState.getJSON(), "success")).build();

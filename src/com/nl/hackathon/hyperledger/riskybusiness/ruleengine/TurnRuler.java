@@ -130,42 +130,52 @@ public class TurnRuler {
 		}
 	}
 
-	public boolean passTurn() {
-		if (currentState.getState() == TurnState.START) {
-			currentState.setState(TurnState.PASS);
-			for (TerritoryNode tn : currentState.gameboard.values()) {
-				if (tn.getOwner().equals(selfPlayer)) {
-					tn.incrementArmiesAmount(1);
+	public String passTurn() {
+		if (currentState.getState() != TurnState.NOT_YOUR_TURN) {
+
+			if (currentState.getState() == TurnState.START) {
+				currentState.setState(TurnState.PASS);
+				for (TerritoryNode tn : currentState.gameboard.values()) {
+					if (tn.getOwner().equals(selfPlayer)) {
+						tn.incrementArmiesAmount(1);
+					}
 				}
+				return null;
 			}
-			return true;
-		} else {
 			System.out.println("Error: Already made an action");
+			return "Error: Already made an action";
+		} else {
+			System.out.println("Error: It's not your turn, you can't wait before you do nothing!");
+			return "Error: It's not your turn, you can't wait before you do nothing!";
 		}
-		return false;
 	}
 
 	public enum TurnState {
 		NOT_YOUR_TURN, START, ATTACK, PASS, MOVE, END;
 	}
 
-	public String setTurnTypeToAttack(boolean b) {
+	public String setTurnTypeToAttack() {
 		if (currentState.getState() == TurnState.START) {
-			if (b) {
-				currentState.setState(TurnState.ATTACK);
-			} else {
-				currentState.setState(TurnState.PASS);
-
-			}
+			currentState.setState(TurnState.ATTACK);
 			return null;
 		} else {
-			if (b && currentState.getState() == TurnState.ATTACK) {
+			if (currentState.getState() == TurnState.ATTACK) {
 				return "Error: Attack? ATTACK, YOU ARE ATTACKING!!!";
-			} else if (!b && currentState.getState() == TurnState.PASS) {
-				return "Error: You already passed your turn, you are a coward by doing it again!";
 			} else {
 				return "Error: current state is not start! {" + currentState.getState() + "}";
 			}
+		}
+	}
+
+	public String startTurnSignal() {
+		currentState.setPlayerTurn();
+		System.out.println("player turn: " + currentState.getCurrentTurnPlayer());
+		if (selfPlayer.equals(currentState.getCurrentTurnPlayer())) {
+			currentState.setState(TurnState.START);
+			return null;
+		} else {
+			currentState.setState(TurnState.NOT_YOUR_TURN);
+			return "not your turn";
 		}
 	}
 }
