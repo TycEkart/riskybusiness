@@ -79,9 +79,40 @@ public class RiskyBusinessRestService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response startTurn(@Context final UriInfo ui) {
 		GameState gameState = GameStateCaretaker.get_instance().gameState;
-		gameState.setPlayerTurn() ;
+		gameState.setPlayerTurn();
 		System.out.println("player turn: " + gameState.getCurrentTurnPlayer());
 		return Response.status(Status.OK).entity("Check log").build();
+	}
+
+	@GET
+	@Path("setAttack")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response setAttack(@Context final UriInfo ui) {
+		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
+				GameStateCaretaker.get_instance().gameState);
+
+		String error = ruler.setTurnTypeToAttack(true);
+		if (error == null) {
+			return Response.status(Status.OK)
+					.entity(ResponseFormat.createResponse(ruler.currentState.getJSON(), "success")).build();
+		} else {
+			return Response.status(Status.OK).entity(ResponseFormat.createResponse(305, error)).build();
+		}
+	}
+
+	@GET
+	@Path("setPass")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response SetPass(@Context final UriInfo ui) {
+		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
+				GameStateCaretaker.get_instance().gameState);
+		String error = ruler.setTurnTypeToAttack(false);
+		if (error == null) {
+			return Response.status(Status.OK)
+					.entity(ResponseFormat.createResponse(ruler.currentState.getJSON(), "success")).build();
+		} else {
+			return Response.status(Status.OK).entity(ResponseFormat.createResponse(305, error)).build();
+		}
 	}
 
 	@GET
@@ -90,10 +121,10 @@ public class RiskyBusinessRestService {
 	public Response attackArea(@Context final UriInfo ui, @PathParam("a") String A, @PathParam("d") String D) {
 		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
 				GameStateCaretaker.get_instance().gameState);
-	
+
 		System.out.println("A: " + A + ", D: " + D);
 		String error = ruler.attack(A, D);
-		if (error==null) {
+		if (error == null) {
 			return Response.status(Status.OK).entity(ResponseFormat
 					.createResponse(GameStateCaretaker.get_instance().gameState.getJSON(), "Destroy successfull"))
 					.build();
@@ -104,16 +135,21 @@ public class RiskyBusinessRestService {
 	}
 
 	@GET
-	@Path("movetroops")
+	@Path("movetroops/{f}/{t}/{n}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response moveTroops(@Context final UriInfo ui) {
-		Map map = new HashMap<>();
-		map.put("returncode", getErrorCode(Status.OK));
-		map.put("errormessage", getErrorMesage(Status.OK));
-		map.put("resultmessage", "");
-		map.put("board", gameState);
-		map.put("anotherMovePossible", "");
-		return Response.status(Status.OK).entity(map).build();
+	public Response moveTroops(@Context final UriInfo ui, @PathParam("f") String from, @PathParam("t") String to,
+			@PathParam("n") String number) {
+		System.out.println("From: " + from + ", To: " + to + ", n:" + number);
+		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
+				GameStateCaretaker.get_instance().gameState);
+		String error = ruler.move(from, to, 1);
+		if (error == null) {
+			return Response.status(Status.OK).entity(ResponseFormat
+					.createResponse(GameStateCaretaker.get_instance().gameState.getJSON(), "Move Success, it's a nice"))
+					.build();
+		} else {
+			return Response.status(Status.OK).entity(ResponseFormat.createResponse(333, error)).build();
+		}
 	}
 
 	@GET

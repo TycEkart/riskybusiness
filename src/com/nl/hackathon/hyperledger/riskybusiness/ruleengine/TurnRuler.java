@@ -5,16 +5,18 @@ package com.nl.hackathon.hyperledger.riskybusiness.ruleengine;
  */
 public class TurnRuler {
 
-	public Player player;
+	public Player selfPlayer;
 	public GameState currentState;
 
-	public TurnRuler(Player self, GameState currentState) {
-		this.player = self;
+	public TurnRuler(Player selfPlayer, GameState currentState) {
+		this.selfPlayer = selfPlayer;
 		this.currentState = currentState;
-		if (self.equals(currentState.getCurrentTurnPlayer())) {
-			currentState.state = TurnState.START;
+		if (!selfPlayer.equals(currentState.getCurrentTurnPlayer())) {
+			currentState.setState(TurnState.NOT_YOUR_TURN);
 		} else {
-			currentState.state = TurnState.NOT_YOUR_TURN;
+			if (currentState.getState() == TurnState.START || currentState.getState() == null) {
+				currentState.setState(TurnState.START);
+			}
 		}
 	}
 
@@ -28,13 +30,13 @@ public class TurnRuler {
 	}
 
 	public String attack(TerritoryNode attack, TerritoryNode def) {
-		switch (currentState.state) {
+		switch (currentState.getState()) {
 		case START:
 		case ATTACK:
-			currentState.state = TurnState.ATTACK;
+			currentState.setState(TurnState.ATTACK);
 			System.out.println("Attack: " + attack + ", def: " + def);
-			if (attack.getOwner().equals(player)) {
-				if (!def.getOwner().equals(player)) {
+			if (attack.getOwner().equals(selfPlayer)) {
+				if (!def.getOwner().equals(selfPlayer)) {
 					if (attack.getArmiesAmount() > 0) {
 						if (attack.isNextToTerritory(def)) {
 							if (attack.getArmiesAmount() == def.getArmiesAmount()) {
@@ -57,7 +59,7 @@ public class TurnRuler {
 							System.out.println("Error: Not a neighbour");
 							return "Error: Not a neighbour";
 						}
-					}else{
+					} else {
 						return "Error: What are you doing, you don't have any armies!";
 					}
 				} else {
@@ -70,45 +72,69 @@ public class TurnRuler {
 				return "Error: attack player != turn player";
 			}
 		default:
-			System.out.println("Error: attack wrong state, == " + currentState.state);
-			return "Error: attack wrong state, == " + currentState.state;
+			System.out.println("Error: attack wrong state, == " + currentState.getState());
+			return "Error: attack wrong state, == " + currentState.getState();
 		}
 	}
 
-	public boolean move(TerritoryNode from, TerritoryNode to, int n) {
-		if (currentState.state != TurnState.END && currentState.state != TurnState.NOT_YOUR_TURN) {
-			currentState.state = TurnState.MOVE;
-			System.out.println("Move From: " + from + ", to: " + to);
-			if (from.getOwner().equals(player)) {
-				if (to.getOwner().equals(player)) {
-					if (from.isNextToTerritory(to)) {
-						if (from.getArmiesAmount() - n >= 0) {
-							from.incrementArmiesAmount(-n);
-							to.incrementArmiesAmount(n);
-							return true;
+	public String move(String from, String to, int number) {
+		if (currentState.gameboard.containsKey(from) && currentState.gameboard.containsKey(to)) {
+			return move(currentState.gameboard.get(from), currentState.gameboard.get(to), number);
+		} else {
+			System.out.println("Error: can't find from/to for move");
+			return "Error: can't find attack/deff for attack";
+		}
+	}
+
+	public String move(TerritoryNode from, TerritoryNode to, int n) {
+		if (currentState.getState() != TurnState.NOT_YOUR_TURN) {
+			if (currentState.getState() != TurnState.END) {
+				currentState.setState(TurnState.MOVE);
+				System.out.println("Move From: " + from + ", to: " + to);
+				if (from.getOwner().equals(selfPlayer)) {
+					if (to.getOwner().equals(selfPlayer)) {
+						if (!from.equals(to)) {
+							if (from.isNextToTerritory(to)) {
+								if (from.getArmiesAmount() - n >= 0) {
+									from.incrementArmiesAmount(-n);
+									to.incrementArmiesAmount(n);
+									return null;
+								} else {
+									System.out.println("Error: Not enough armies {" + n + "}");
+									return "Error: Not enough armies {" + n + "}";
+								}
+							} else {
+								System.out.println("Error: Not a neighbour");
+								return "Error: Not a neighbour";
+							}
 						} else {
-							System.out.println("Error: Not enough armies {" + n + "}");
+							System.out.println("Error: Your troops are already there!");
+							return "Error: Your troops are already there!";
 						}
 					} else {
-						System.out.println("Error: Not a neighbour");
+						System.out.println("Error: not your land yet!");
+						return "Error: not your land yet!";
 					}
 				} else {
-					System.out.println("Error: to player != turn player");
+					System.out.println("Error: from player != turn player");
+					return "Error: from player != turn player";
+
 				}
 			} else {
-				System.out.println("Error: from player != turn player");
+				System.out.println("Error: Can't move, your turn ended");
+				return "Error: Can't move, turn ended";
 			}
 		} else {
-			System.out.println("Error: Can't move, turn ended");
+			System.out.println("Error: Can't move, not your turn");
+			return "Error: Can't move, not your turn";
 		}
-		return false;
 	}
 
 	public boolean passTurn() {
-		if (currentState.state == TurnState.START) {
-			currentState.state = TurnState.PASS;
+		if (currentState.getState() == TurnState.START) {
+			currentState.setState(TurnState.PASS);
 			for (TerritoryNode tn : currentState.gameboard.values()) {
-				if (tn.getOwner().equals(player)) {
+				if (tn.getOwner().equals(selfPlayer)) {
 					tn.incrementArmiesAmount(1);
 				}
 			}
@@ -121,5 +147,25 @@ public class TurnRuler {
 
 	public enum TurnState {
 		NOT_YOUR_TURN, START, ATTACK, PASS, MOVE, END;
+	}
+
+	public String setTurnTypeToAttack(boolean b) {
+		if (currentState.getState() == TurnState.START) {
+			if (b) {
+				currentState.setState(TurnState.ATTACK);
+			} else {
+				currentState.setState(TurnState.PASS);
+
+			}
+			return null;
+		} else {
+			if (b && currentState.getState() == TurnState.ATTACK) {
+				return "Error: Attack? ATTACK, YOU ARE ATTACKING!!!";
+			} else if (!b && currentState.getState() == TurnState.PASS) {
+				return "Error: You already passed your turn, you are a coward by doing it again!";
+			} else {
+				return "Error: current state is not start! {" + currentState.getState() + "}";
+			}
+		}
 	}
 }

@@ -40,7 +40,7 @@ public class TerritoryNode {
 	public void addNeighbourNode(TerritoryNode territoryNode) {
 		for (TerritoryNode tn : neighbours) {
 			if (tn.id.equals(territoryNode.id)) {
-				System.out.println("NeighbourNode already added");
+				//System.out.println("NeighbourNode already added");
 				return;
 			}
 		}
@@ -111,7 +111,6 @@ public class TerritoryNode {
 	public static JSONArray generateJsonArray(Map<String, TerritoryNode> gameboard) throws JSONException {
 		// TODO Auto-generated method stub
 		JSONArray ja = new JSONArray();
-
 		for (TerritoryNode tn : gameboard.values()) {
 			JSONObject jo = new JSONObject();
 			jo.put("id", tn.id);
@@ -120,13 +119,31 @@ public class TerritoryNode {
 			if (tn.getOwner() != null) {
 				jo.put("owner", tn.getOwner().ip);
 				jo.put("ownerN", tn.getOwner().name);
-			}else{
+			} else {
 				jo.put("owner", "NULL");
 			}
 			jo.put("armies", tn.armiesAmount);
 
+			JSONArray nja = new JSONArray();
+			for (TerritoryNode ntn : tn.neighbours) {
+				nja.put(ntn.id);
+			}
+			jo.put("neighbours", nja);
+
 			ja.put(jo);
 		}
 		return ja;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj.getClass().equals(TerritoryNode.class)) {
+			return id.equals(((TerritoryNode) obj).id);
+		} else {
+			return false;
+		}
 	}
 }

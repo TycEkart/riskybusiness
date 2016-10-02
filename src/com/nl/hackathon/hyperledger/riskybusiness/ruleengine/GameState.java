@@ -15,15 +15,23 @@ public class GameState {
 	private Player previousPlayer, currentPlayer;
 	public Map<String, TerritoryNode> gameboard = new HashMap<>();
 	public List<Player> players;
-	public TurnState state;
+	private TurnState state;
 
+	public TurnState getState() {
+		return state;
+	}
+
+	public void setState(TurnState state) {
+		System.out.println("Change State: old: " + this.state + ", new: " + state);
+		this.state = state;
+	}
 
 	public GameState(Player previousTurnFromPlayer) {
 		this.previousPlayer = previousTurnFromPlayer;
 		players = new ArrayList<>();
 	}
 
-	public void setPlayerTurn() {
+	public void setPlayerTurn() {		
 		previousPlayer = currentPlayer;
 		if (previousPlayer == null) {
 			currentPlayer = players.get(0);
@@ -74,8 +82,14 @@ public class GameState {
 					return a.distanceToNode(o1) - a.distanceToNode(o2);
 				}
 			});
-			for (int i = 0; i < 3; i++) {
-				a.addNeighbourNode(nodes.get(i));
+			int times = 3;
+			for (int i = 0; i < times; i++) {
+				if (!a.equals(nodes.get(i))) {
+					a.addNeighbourNode(nodes.get(i));
+				} else {
+					// System.out.println("TEST: " + a.id);
+					times = 4;
+				}
 			}
 
 		}
