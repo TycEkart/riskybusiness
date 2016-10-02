@@ -8,7 +8,7 @@ public class ResponseFormat {
 		JSONObject res = new JSONObject();
 		try {
 			res.put("returncode", returncode);
-			res.put("errormessage", "");
+			res.put("errormessage", errormessage);
 			res.put("resultmessage", resultmessage);
 			res.put("data", data);
 		} catch (JSONException e) {
@@ -19,11 +19,23 @@ public class ResponseFormat {
 
 	/**
 	 * Positive respone
+	 * 
 	 * @param data
 	 * @param resultmessage
 	 * @return
 	 */
 	public static String createResponse(JSONObject data, String resultmessage) {
 		return createResponse(data, 200, "", resultmessage);
+	}
+
+	/**
+	 * negative respone
+	 * 
+	 * @param data
+	 * @param resultmessage
+	 * @return
+	 */
+	public static String createResponse(int returncode, String errormessage) {
+		return createResponse(null, returncode, errormessage, "");
 	}
 }

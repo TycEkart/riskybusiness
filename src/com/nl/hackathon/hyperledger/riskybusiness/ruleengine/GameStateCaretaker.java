@@ -4,6 +4,7 @@ public class GameStateCaretaker {
 
 	protected static GameStateCaretaker _instance;
     public GameState gameState;
+	public Player self;
 
 	private GameStateCaretaker() {
 	}

@@ -7,9 +7,11 @@ import com.nl.hackathon.hyperledger.riskybusiness.dto.RiskyBusinessDTO;
 import com.nl.hackathon.hyperledger.riskybusiness.ruleengine.GameState;
 import com.nl.hackathon.hyperledger.riskybusiness.ruleengine.GameStateCaretaker;
 import com.nl.hackathon.hyperledger.riskybusiness.ruleengine.Player;
+import com.nl.hackathon.hyperledger.riskybusiness.ruleengine.TurnRuler;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -24,8 +26,6 @@ import java.util.Map;
 @Path("riskybusiness")
 public class RiskyBusinessRestService {
 
-	static Player self = new Player("Thijs", "192.168.0.102", 1);
-
 	/**
 	 * This method returns the current state of the game
 	 *
@@ -35,6 +35,7 @@ public class RiskyBusinessRestService {
 	@Path("createGame")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGame() {
+		Player self = new Player("Thijs", "192.168.0.102", 1);
 
 		GameState gameState;
 		gameState = new GameState(null);
@@ -44,7 +45,9 @@ public class RiskyBusinessRestService {
 		gameState.createBoard();
 		gameState.assignTerritories();
 		GameStateCaretaker.get_instance().gameState = gameState;
-		return Response.status(Status.OK).entity(ResponseFormat.createResponse(gameState.getJSON(), "game created")).build();
+		GameStateCaretaker.get_instance().self = self;
+		return Response.status(Status.OK).entity(ResponseFormat.createResponse(gameState.getJSON(), "game created"))
+				.build();
 	}
 
 	/**
@@ -75,28 +78,29 @@ public class RiskyBusinessRestService {
 	@Path("startturn")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response startTurn(@Context final UriInfo ui) {
-		/*
-		 * RiskyBusinessDTO riskyBusinessDTO = new RiskyBusinessDTO();
-		 * riskyBusinessDTO.setReturncode(getErrorCode(Status.OK));
-		 * riskyBusinessDTO.setErrormessage(getErrorMesage(Status.OK)); return
-		 * Response.status(Status.OK).entity(riskyBusinessDTO).build();
-		 */
-
-		return Response.status(Status.OK).entity("Hellowworldd").build();
+		GameState gameState = GameStateCaretaker.get_instance().gameState;
+		gameState.setPlayerTurn() ;
+		System.out.println("player turn: " + gameState.getCurrentTurnPlayer());
+		return Response.status(Status.OK).entity("Check log").build();
 	}
 
 	@GET
-	@Path("attackarea")
+	@Path("/attackarea/{a}/{d}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response attackArea(@Context final UriInfo ui) {
-		Map map = new HashMap<>();
+	public Response attackArea(@Context final UriInfo ui, @PathParam("a") String A, @PathParam("d") String D) {
+		TurnRuler ruler = new TurnRuler(GameStateCaretaker.get_instance().self,
+				GameStateCaretaker.get_instance().gameState);
+	
+		System.out.println("A: " + A + ", D: " + D);
+		String error = ruler.attack(A, D);
+		if (error==null) {
+			return Response.status(Status.OK).entity(ResponseFormat
+					.createResponse(GameStateCaretaker.get_instance().gameState.getJSON(), "Destroy successfull"))
+					.build();
+		} else {
+			return Response.status(Status.OK).entity(ResponseFormat.createResponse(304, error)).build();
+		}
 
-		map.put("returncode", getErrorCode(Status.OK));
-		map.put("errormessage", getErrorMesage(Status.OK));
-		map.put("resultmessage", "");
-		map.put("board", gameState);
-		map.put("anotherAttackPossible", true);
-		return Response.status(Status.OK).entity(map).build();
 	}
 
 	@GET

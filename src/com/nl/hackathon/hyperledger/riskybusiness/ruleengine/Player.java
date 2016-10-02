@@ -28,6 +28,9 @@ public class Player {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
 		if (!obj.getClass().equals(Player.class)) {
 			return false;
 		} else {

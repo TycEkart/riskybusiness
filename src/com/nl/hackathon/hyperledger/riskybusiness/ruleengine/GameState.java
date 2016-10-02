@@ -6,6 +6,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.nl.hackathon.hyperledger.riskybusiness.ruleengine.TurnRuler.TurnState;
+
 /**
  * Created by Tyc on 01/10/2016.
  */
@@ -13,6 +15,8 @@ public class GameState {
 	private Player previousPlayer, currentPlayer;
 	public Map<String, TerritoryNode> gameboard = new HashMap<>();
 	public List<Player> players;
+	public TurnState state;
+
 
 	public GameState(Player previousTurnFromPlayer) {
 		this.previousPlayer = previousTurnFromPlayer;
