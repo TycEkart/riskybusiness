@@ -36,13 +36,13 @@ public class RiskyBusinessRestService {
 	@Path("createGame")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGame() {
-		Player self = new Player("Thijs", "192.168.0.102", 1);
+		Player self = new Player("Thijs", "green");
 
 		GameState gameState;
 		gameState = new GameState(null);
 		gameState.addPlayer(self);
-		gameState.addPlayer(new Player("Jan-Paul", "192.168.0.101", 2));
-		gameState.addPlayer(new Player("Aschwin", "192.168.0.?", 3));
+		gameState.addPlayer(new Player("Jan-Paul", "blue"));
+		gameState.addPlayer(new Player("Aschwin", "red"));
 		gameState.createBoard();
 		gameState.assignTerritories();
 		GameStateCaretaker.get_instance().gameState = gameState;

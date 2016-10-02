@@ -114,22 +114,21 @@ public class TerritoryNode {
 		for (TerritoryNode tn : gameboard.values()) {
 			JSONObject jo = new JSONObject();
 			jo.put("id", tn.id);
-			jo.put("coordinateX", tn.coordinateX);
-			jo.put("coordinateY", tn.coordinateY);
+			jo.put("x", tn.coordinateX);
+			jo.put("y", tn.coordinateY);
 			if (tn.getOwner() != null) {
-				jo.put("owner", tn.getOwner().ip);
+				jo.put("owner", tn.getOwner().color);
 				jo.put("ownerN", tn.getOwner().name);
 			} else {
 				jo.put("owner", "NULL");
 			}
-			jo.put("armies", tn.armiesAmount);
+			jo.put("numberOfTroops", tn.armiesAmount);
 
 			JSONArray nja = new JSONArray();
 			for (TerritoryNode ntn : tn.neighbours) {
 				nja.put(ntn.id);
 			}
-			jo.put("neighbours", nja);
-
+			jo.put("adjacentFields", nja);
 			ja.put(jo);
 		}
 		return ja;

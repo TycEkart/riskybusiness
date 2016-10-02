@@ -64,10 +64,12 @@ public class GameState {
 		int size = 10;
 		for (int i = 0; i < size; i++) {
 			String id = Integer.toString(i);
-			TerritoryNode tn = new TerritoryNode(id, i % 4 * 50, i / 4 * 50);
+			TerritoryNode tn = new TerritoryNode(id, i % 4 * 40, i / 4 * 40);
 			gameboard.put(id, tn);
 		}
 		connectNodes();
+		
+		gameboard.get("5").incrementArmiesAmount(2);
 
 		// bind last to first
 
@@ -146,7 +148,7 @@ public class GameState {
 			jo.put("GameName", "Test");
 			JSONArray arrayPlayers = new JSONArray();
 			jo.put("players", Player.generateJsonArray(players));
-			jo.put("terrytories", TerritoryNode.generateJsonArray(gameboard));
+			jo.put("board", TerritoryNode.generateJsonArray(gameboard));
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

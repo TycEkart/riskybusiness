@@ -1,0 +1,31 @@
+.map-wrapper {
+    position: relative;
+    text-align: center;
+    width: 450px;
+    height: 450px;
+    margin-bottom:10px;
+}
+
+.map-field {
+    position: absolute;
+    cursor: pointer;
+    width: 5em;
+    height: 5em;
+   
+    border-radius: 50%;
+    background-size: 100% 100%;
+}
+
+.gameboard td{
+    width: 5em;
+    height: 5em;
+    background-color: blue;
+}
+
+.selected-square {
+    background-color: red;
+}
+
+h2{
+    color: rgba(255, 215, 0, 0.67);
+}

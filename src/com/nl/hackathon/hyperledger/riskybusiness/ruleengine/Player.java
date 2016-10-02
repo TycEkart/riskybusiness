@@ -12,13 +12,11 @@ import org.codehaus.jettison.json.JSONObject;
  * Created by Tyc on 01/10/2016.
  */
 public class Player {
-	public final String name, ip;
-	public final int color;
+	public final String name, color;
 
-	public Player(String name, String ip, int color) {
+	public Player(String name, String ip) {
 		this.name = name;
-		this.ip = ip;
-		this.color = color;
+		this.color = ip;
 	}
 
 	@Override
@@ -34,7 +32,7 @@ public class Player {
 		if (!obj.getClass().equals(Player.class)) {
 			return false;
 		} else {
-			return ((Player) obj).ip.equals(ip);
+			return ((Player) obj).color.equals(color);
 		}
 	}
 
@@ -43,7 +41,7 @@ public class Player {
 		for (Player p : players) {
 			JSONObject jo = new JSONObject();
 			jo.put("name", p.name);
-			jo.put("ip", p.ip);
+			jo.put("ip", p.color);
 			jo.put("color", p.color);
 			ja.put(jo);
 		}
